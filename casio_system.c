@@ -12,7 +12,7 @@
 #define  BUF_LEN			200
 #define  CASIO_TASKS_NUM		20	
 
-
+//Estructura 
 struct casio_tasks_config {
 	int pid;
 	double min_exec;
@@ -177,6 +177,7 @@ int main(int argc, char *argv[])
 	
 	int duration,i,j,k,n;
 	struct casio_tasks_config casio_tasks_config[CASIO_TASKS_NUM];
+	//Estructura usada para especificar cuando un timer va a expirar 
 	struct itimerval sim_time;
 	char arg[CASIO_TASKS_NUM][BUF_LEN],*parg[CASIO_TASKS_NUM];
 	
@@ -197,10 +198,12 @@ int main(int argc, char *argv[])
 	sim_time.it_value.tv_usec = 0;
 
 	signal(SIGALRM, end_simulation);
+	//Indicando cuando finaliza el timer
 	setitimer(ITIMER_REAL, &sim_time, NULL);	
 
 
 	for(i=0;i<casio_tasks_num;i++){
+		//Copia el string al que apunta
 		strcpy(arg[0],"casio_task");	
 				
 		sprintf(arg[1],"%d",casio_tasks_config[i].pid);				

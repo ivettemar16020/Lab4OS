@@ -40,29 +40,37 @@ double min_inter_arrival_time,max_inter_arrival_time; //seconds
 unsigned int casio_id,jid=1;
 struct itimerval inter_arrival_time;
 
-
+//Funcion que itera 178250 veces
 void burn_1millisecs() {
 	unsigned long long i;
 	for(i=0; i<LOOP_ITERATIONS_PER_MILLISEC; i++);
 }
 
+//Utiliza la función anterior para iterar la n cantidad de veces
 void burn_cpu(long milliseconds){
 	long i;
 	for(i=0; i<milliseconds; i++)
 		burn_1millisecs();
 }
 
+//Setea los parametros
 void clear_sched_param(struct sched_param *param)
 {
 	param->casio_id=-1;
 	param->deadline=0;
 }
+
+//Imprime el process id y deadline
 void print_task_param(struct sched_param *param)
 {
     	printf("\npid[%d]\n",param->casio_id);
 	printf("deadline[%llu]\n",param->deadline);
 }
 
+//it_interval - intervalo de tiempo: 
+// 				intervalo de tiempo actual
+//tv_sec: segundos desde enereo 1, 1970(UTC)
+//tv_usec: microsegundos
 
 void clear_signal_timer(struct itimerval *t)
 {
@@ -71,6 +79,7 @@ void clear_signal_timer(struct itimerval *t)
 	t->it_value.tv_sec = 0;
 	t->it_value.tv_usec = 0;
 }
+
 void set_signal_timer(struct itimerval *t,double secs)
 {
 	t->it_interval.tv_sec = 0;
@@ -87,6 +96,8 @@ void print_signal_timer(struct itimerval *t)
 		t->it_value.tv_sec,
 		t->it_value.tv_usec);
 }
+
+//Genera numero random y lo añade al min 
 double get_time_value(double min, double max)
 {
 	if(min==max)
@@ -94,12 +105,17 @@ double get_time_value(double min, double max)
 	return (min + (((double)rand()/RAND_MAX)*(max-min)));
 }
 
+//Imprime los tasks que estan iniciando 
 void start_task(int s)
 {
 	printf("\nTask(%d) has just started\n",casio_id);
 	set_signal_timer(&inter_arrival_time,get_time_value(min_offset,max_offset));
 	setitimer(ITIMER_REAL, &inter_arrival_time, NULL);
 }
+
+//setitimer: función que provee un mecanismo 
+//para que los procesos puedan interrumpirse por si solos en el futuro. 
+
 
 void do_work(int s)
 {
@@ -120,6 +136,7 @@ void do_work(int s)
 
 }
 
+//Tasks que finalizan 
 void end_task(int s)
 {
 	printf("\nTask(%d) has finished\n",casio_id);
@@ -127,12 +144,13 @@ void end_task(int s)
 }
 
 int main(int argc, char** argv) {
-
+	//Estructura 
 	struct sched_param param;
 	
 	unsigned long long seed;
 	int i;
 
+	//Referencias a espacios de memoria 
 	clear_signal_timer(&inter_arrival_time);
 	
 	clear_sched_param(&param);
@@ -148,7 +166,7 @@ int main(int argc, char** argv) {
 	min_offset=atof(argv[7]);
 	max_offset=atof(argv[8]);
 	seed=atol(argv[9]);
-	srand(seed);
+	srand(seed); //Crear pseudorandom con semilla
 	signal(SIGUSR1, start_task);
 	signal(SIGALRM, do_work);
 	signal(SIGUSR2, end_task);
